@@ -1,5 +1,6 @@
 ﻿using Northwind.Business.Abstract;
 using Northwind.Business.Concrete;
+using Northwind.Business.DependencyResolvers.Ninject;
 using Northwind.DataAccess.Concrete.EntityFramework;
 using Northwind.Entities.Concrete;
 using System;
@@ -18,8 +19,8 @@ namespace Northwind.WebFormsUI
         public Form1()
         {
             InitializeComponent();
-            _productService = new ProductManager(new EfProductDal());
-            _categoryService = new CategoryManager(new EfCategoryDal());
+            _productService = InstanceFactory.GetInstance<IProductService>();
+            _categoryService = InstanceFactory.GetInstance<ICategoryService>();
         }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -115,16 +116,23 @@ namespace Northwind.WebFormsUI
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            _productService.Add(new Product
+            try
             {
-                CategoryId = Convert.ToInt32(cbxCategoryId.SelectedValue),
-                ProductName = tbxProductName2.Text,
-                QuantityPerUnit=tbxQuantityPerUnit.Text,
-                UnitPrice=Convert.ToDecimal(tbxUnitPrice.Text),
-                UnitsInStock=Convert.ToInt16(tbxStock.Text)
-            }) ;
-            MessageBox.Show("Ürün eklendi!");
-            LoadProducts();
+                _productService.Add(new Product
+                {
+                    CategoryId = Convert.ToInt32(cbxCategoryId.SelectedValue),
+                    ProductName = tbxProductName2.Text,
+                    QuantityPerUnit = tbxQuantityPerUnit.Text,
+                    UnitPrice = Convert.ToDecimal(tbxUnitPrice.Text),
+                    UnitsInStock = Convert.ToInt16(tbxStock.Text)
+                });
+                MessageBox.Show("Ürün eklendi!");
+                LoadProducts();
+            }
+            catch(Exception exception)
+            {
+                MessageBox.Show(exception.Message);
+            }
         }
 
         private void cbxCategoryId_TextChanged(object sender, EventArgs e)
